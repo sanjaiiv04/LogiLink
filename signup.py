@@ -11,7 +11,7 @@ def driver_signup():
     if st.button("Signup"):
         conn = connect_to_db()
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO login_access (email, password, name, role) VALUES (%s, %s, %s, %s)",
+        cursor.execute("INSERT INTO login_access (email, password, username, role) VALUES (%s, %s, %s, %s)",
                        (email, password, name, "driver"))
         conn.commit()
         st.success("Signup successful!")
@@ -28,7 +28,7 @@ def customer_signup():
     if st.button("Signup"):
         conn = connect_to_db()
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO login_access (email, password, name, role) VALUES (%s, %s, %s, %s)",
+        cursor.execute("INSERT INTO login_access (email, password, username, role) VALUES (%s, %s, %s, %s)",
                        (email, password, name, "customer"))
         conn.commit()
         st.success("Signup successful!")
@@ -45,7 +45,7 @@ def owner_signup():
     if st.button("Signup"):
         conn = connect_to_db()
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO login_access (email, password, name, role) VALUES (%s, %s, %s, %s)",
+        cursor.execute("INSERT INTO login_access (email, password, username, role) VALUES (%s, %s, %s, %s)",
                        (email, password, name, "owner"))
         conn.commit()
         st.success("Signup successful!")

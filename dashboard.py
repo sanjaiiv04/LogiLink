@@ -63,7 +63,7 @@ def dashboard(role):
                 "name": ["Location 1", "Location 2", "Location 3"]
             }))
         elif page == "Request OTP":
-            st.write("Driver's Verification Portal Page")
+            st.write("Driver's OTP Request Page")
             username_otp = st.text_input("Enter username of driver")
             package_otp = st.text_input("Enter package details")
 
@@ -73,13 +73,22 @@ def dashboard(role):
                 query = "SELECT driver_alloted, package_details FROM driver_owner_verification WHERE driver_alloted = %s AND package_details = %s"
                 cursor.execute(query, (username_otp, package_otp))
                 results_from_query = cursor.fetchone()
-                # Fetch one row
-
                 if results_from_query:
-                    st.success("Verification successful!")
-                    # Now you can use results_from_query[0] for username and results_from_query[1] for package_details
+                    # Get the owner_alloted from driver_owner_verification
+                    owner_alloted_query = "SELECT owner_alloted FROM driver_owner_verification WHERE driver_alloted = %s"
+                    cursor.execute(owner_alloted_query, (username_otp,))
+                    owner_alloted_result = cursor.fetchone()
+
+                    if owner_alloted_result:
+                        owner_alloted = owner_alloted_result[0]
+                        insert_query = "INSERT INTO generate_otp_to_owner (driver_alloted, owner_alloted, fullfilled) VALUES (%s, %s, %s)"
+                        cursor.execute(insert_query, (username_otp, owner_alloted, False))
+                        conn.commit()
+                        st.success("OTP Request successful!")
+                    else:
+                        st.error("Owner not found for the given driver.")
                 else:
-                    st.error("Verification failed! Please check your username and package details.")
+                    st.error("OTP Request failed! Please check your username and package details.")
 
                 conn.close()
 
