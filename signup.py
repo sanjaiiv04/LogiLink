@@ -35,9 +35,13 @@ def driver_signup():
 
 def customer_signup():
     st.write("Customer Signup Form")
+    name = st.text_input("Name", key="customer_name")
+    address=st.text_area("Address",key="customer_address")
     email = st.text_input("Email", key="customer_email")
     password = st.text_input("Password", type="password", key="customer_password")
-    name = st.text_input("Name", key="customer_name")
+    image_access=st.button("Take photos")
+    if image_access:
+        capture_face(name)
     # Add more fields as needed
 
     if st.button("Signup"):
@@ -50,18 +54,21 @@ def customer_signup():
         if existing_user:
             st.warning("Username already exists. Please choose a different username.")
         else:
-            cursor.execute("INSERT INTO login_access (email, password, username, role) VALUES (%s, %s, %s, %s)",
-                            (email, password, name, "customer"))
+            cursor.execute("INSERT INTO login_access (address,email, password, username, role) VALUES (%s,%s, %s, %s, %s)",
+                            (address,email, password, name, "customer"))
             conn.commit()
             st.success("Signup successful!")
         conn.close()
 
 def owner_signup():
     st.write("Owner Signup Form")
+    name = st.text_input("Name", key="owner_name")
+    address=st.text_area("Address",key="owner_address")
     email = st.text_input("Email", key="owner_email")
     password = st.text_input("Password", type="password", key="owner_password")
-    name = st.text_input("Name", key="owner_name")
-    # Add more fields as needed
+    image_access=st.button("Take photos")
+    if image_access:
+        capture_face(name)
 
     if st.button("Signup"):
         conn = connect_to_db()
@@ -73,8 +80,8 @@ def owner_signup():
         if existing_user:
             st.warning("Username already exists. Please choose a different username.")
         else:
-            cursor.execute("INSERT INTO login_access (email, password, username, role) VALUES (%s, %s, %s, %s)",
-                            (email, password, name, "owner"))
+            cursor.execute("INSERT INTO login_access (address,email, password, username, role) VALUES (%s,%s, %s, %s, %s)",
+                            (address,email, password, name, "owner"))
             conn.commit()
             st.success("Signup successful!")
         conn.close()

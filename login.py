@@ -14,6 +14,7 @@ def driver_login():
         if result:
             st.session_state['page'] = 'dashboard'
             st.session_state['role'] = 'driver'
+            st.session_state['user'] = str(email)
         else:
             st.error("Invalid credentials")
         cursor.close()
@@ -34,6 +35,7 @@ def owner_login():
         if result:
             st.session_state['page'] = 'dashboard'
             st.session_state['role'] = 'owner'
+            st.session_state['user'] = str(email)
         else:
             st.error("Invalid credentials")
         cursor.close()
@@ -54,6 +56,7 @@ def customer_login():
         if result:
             st.session_state['page'] = 'dashboard'
             st.session_state['role'] = 'customer'
+            st.session_state['user'] = str(email)
         else:
             st.error("Invalid credentials")
         cursor.close()

@@ -3,6 +3,8 @@ from signup import signup
 from dashboard import dashboard
 from login import login
 def main():
+    if 'user' not in st.session_state:
+        st.session_state['user'] = None
     if 'page' not in st.session_state or st.session_state['page'] == 'signup':
         signup()
     elif st.session_state['page'] == 'dashboard':

@@ -21,6 +21,14 @@ def dashboard(role):
         page = st.sidebar.radio("Select Page", ("My Info", "My Location", "Verification Portal"))
         if page == "My Info":
             st.write("Owner's Info Page")
+            st.write("Driver's Info Page")
+            name_owner=st.session_state['user']
+            conn=connect_to_db()
+            cursor=conn.cursor()
+            owner_dtls=cursor.execute("select * from login_access where username= %s",(name_owner,))
+            result = cursor.fetchone()
+            if result:
+                st.write(result)
             logout_status = st.button("Logout")
             if logout_status:
                 st.session_state['page'] = None
@@ -102,6 +110,13 @@ def dashboard(role):
         page = st.sidebar.radio("Select Page", ("My Info", "My Location", "Verification Portal", "Request OTP"))
         if page == "My Info":
             st.write("Driver's Info Page")
+            name_driver=st.session_state['user']
+            conn=connect_to_db()
+            cursor=conn.cursor()
+            driver_dtls=cursor.execute("select * from login_access where username= %s",(name_driver,))
+            result = cursor.fetchone()
+            if result:
+                st.write(result)
             logout_status = st.button("Logout")
             if logout_status:
                 st.session_state['page'] = None
