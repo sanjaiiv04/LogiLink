@@ -1,8 +1,18 @@
-import streamlit as st
-import pandas as pd
 from connectiondb import connect_to_db
 import random
+from streamlit_geolocation import streamlit_geolocation
+from datetime import datetime, timedelta
+import streamlit as st
+import pandas as pd
+from geopy.distance import geodesic
+import pydeck as pdk
+import folium
+from streamlit_folium import folium_static
+
+random_location = {'latitude': 13.0827, 'longitude': 80.2707}
+
 def dashboard(role):
+    st.sidebar.image("./logo.png", use_column_width=True)
     st.title(f"LogiLink {role.capitalize()} Dashboard")
     st.sidebar.title("Navigate")
 
@@ -14,13 +24,53 @@ def dashboard(role):
             if logout_status:
                 st.session_state['page'] = None
         elif page == "My Location":
-            st.write("Package Location Page")
-            # Display map with predefined GPS locations
-            st.map(pd.DataFrame({
-                "latitude": [37.7749, 40.7128, 51.5074],
-                "longitude": [-122.4194, -74.0060, -0.1278],
-                "name": ["Location 1", "Location 2", "Location 3"]
-            }))
+            try:
+                location = streamlit_geolocation()
+                st.write("Package Location Page")
+
+                # Create a folium map centered at the user's location
+                m = folium.Map(location=[location['latitude'], location['longitude']], zoom_start=10)
+
+                # Add marker for user's location
+                folium.Marker(
+                    [location['latitude'], location['longitude']],
+                    popup="Your Location",
+                    icon=folium.Icon(color="blue")
+                ).add_to(m)
+
+                # Add marker for random location
+                folium.Marker(
+                    [random_location['latitude'], random_location['longitude']],
+                    popup="Random Location",
+                    icon=folium.Icon(color="red")
+                ).add_to(m)
+
+                # Add a line between the two locations
+                folium.PolyLine(
+                    locations=[[location['latitude'], location['longitude']],
+                               [random_location['latitude'], random_location['longitude']]],
+                    color='green',
+                    weight=5,
+                    opacity=0.7
+                ).add_to(m)
+
+                # Display the map
+                folium_static(m)
+
+                # Calculate distance
+                distance = geodesic((location['latitude'], location['longitude']),
+                                    (random_location['latitude'], random_location['longitude'])).miles
+                st.write(f"Distance to random location: {distance:.2f} miles")
+
+                # Estimate ETA (assuming average speed of 30 mph)
+                average_speed_mph = 30
+                eta_hours = distance / average_speed_mph
+                current_time = datetime.now()
+                eta_time = current_time + timedelta(hours=eta_hours)
+                st.write(f"Estimated Time of Arrival: {eta_time.strftime('%Y-%m-%d %H:%M:%S')}")
+
+            except Exception as e:
+                st.error(f"Error getting location: {e}")
         elif page == "Verification Portal":
             st.write("Owner's Verification Portal Page")
             username_otp = st.text_input("Enter username of driver")
@@ -55,13 +105,53 @@ def dashboard(role):
             if logout_status:
                 st.session_state['page'] = None
         elif page == "My Location":
-            st.write("Driver's Location Page")
-            # Display map with predefined GPS locations
-            st.map(pd.DataFrame({
-                "latitude": [37.7749, 40.7128, 51.5074],
-                "longitude": [-122.4194, -74.0060, -0.1278],
-                "name": ["Location 1", "Location 2", "Location 3"]
-            }))
+            try:
+                location = streamlit_geolocation()
+                st.write("Package Location Page")
+
+                # Create a folium map centered at the user's location
+                m = folium.Map(location=[location['latitude'], location['longitude']], zoom_start=10)
+
+                # Add marker for user's location
+                folium.Marker(
+                    [location['latitude'], location['longitude']],
+                    popup="Your Location",
+                    icon=folium.Icon(color="blue")
+                ).add_to(m)
+
+                # Add marker for random location
+                folium.Marker(
+                    [random_location['latitude'], random_location['longitude']],
+                    popup="Random Location",
+                    icon=folium.Icon(color="red")
+                ).add_to(m)
+
+                # Add a line between the two locations
+                folium.PolyLine(
+                    locations=[[location['latitude'], location['longitude']],
+                               [random_location['latitude'], random_location['longitude']]],
+                    color='green',
+                    weight=5,
+                    opacity=0.7
+                ).add_to(m)
+
+                # Display the map
+                folium_static(m)
+
+                # Calculate distance
+                distance = geodesic((location['latitude'], location['longitude']),
+                                    (random_location['latitude'], random_location['longitude'])).miles
+                st.write(f"Distance to random location: {distance:.2f} miles")
+
+                # Estimate ETA (assuming average speed of 30 mph)
+                average_speed_mph = 30
+                eta_hours = distance / average_speed_mph
+                current_time = datetime.now()
+                eta_time = current_time + timedelta(hours=eta_hours)
+                st.write(f"Estimated Time of Arrival: {eta_time.strftime('%Y-%m-%d %H:%M:%S')}")
+
+            except Exception as e:
+                st.error(f"Update Location")
         elif page == "Request OTP":
             st.write("Driver's OTP Request Page")
             username_otp = st.text_input("Enter username of driver")
