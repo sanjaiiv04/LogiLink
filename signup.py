@@ -1,11 +1,20 @@
 import streamlit as st
+import os
 import psycopg2
+import pickle
+import cv2
+import numpy as np
 from connectiondb import connect_to_db
+from face_registration import capture_face
 def driver_signup():
     st.write("Driver Signup Form")
+    name = st.text_input("Name", key="driver_name")
+    address=st.text_area("Address",key="driver_address")
     email = st.text_input("Email", key="driver_email")
     password = st.text_input("Password", type="password", key="driver_password")
-    name = st.text_input("Name", key="driver_name")
+    image_access=st.button("Take photos")
+    if image_access:
+        capture_face(name)
     # Add more fields as needed
 
     if st.button("Signup"):
@@ -18,8 +27,8 @@ def driver_signup():
         if existing_user:
             st.warning("Username already exists. Please choose a different username.")
         else:
-            cursor.execute("INSERT INTO login_access (email, password, username, role) VALUES (%s, %s, %s, %s)",
-                            (email, password, name, "driver"))
+            cursor.execute("INSERT INTO login_access (address,email, password, username, role) VALUES (%s,%s, %s, %s, %s)",
+                            (address,email, password, name, "driver"))
             conn.commit()
             st.success("Signup successful!")
         conn.close()

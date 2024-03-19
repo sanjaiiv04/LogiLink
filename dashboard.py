@@ -8,6 +8,7 @@ from geopy.distance import geodesic
 import pydeck as pdk
 import folium
 from streamlit_folium import folium_static
+from connectiondb import connect_to_db
 
 random_location = {'latitude': 13.0827, 'longitude': 80.2707}
 
