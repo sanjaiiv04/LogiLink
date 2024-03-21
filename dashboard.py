@@ -200,7 +200,7 @@ def dashboard(role):
                 st.error(f"Update Location")
         elif page == "Request OTP":
             st.write("Driver's OTP Request Page")
-            username_otp = st.text_input("Enter username of driver")
+            username_otp = st.session_state['user']
             package_otp = st.text_input("Enter package details")
 
             if st.button("Verify"):
