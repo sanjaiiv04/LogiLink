@@ -8,6 +8,7 @@ from geopy.distance import geodesic
 import pydeck as pdk
 import folium
 from streamlit_folium import folium_static
+import numpy as np
 from connectiondb import connect_to_db
 
 random_location = {'latitude': 13.0827, 'longitude': 80.2707}
@@ -18,20 +19,46 @@ def dashboard(role):
     st.sidebar.title("Navigate")
 
     if role == 'owner':
-        page = st.sidebar.radio("Select Page", ("My Info", "My Location", "Verification Portal"))
+        page = st.sidebar.radio("Select Page", ("My Info","Inhouse Driver DataBase", "My Location", "Verification Portal"))
         if page == "My Info":
             st.write("Owner's Info Page")
-            st.write("Driver's Info Page")
             name_owner=st.session_state['user']
             conn=connect_to_db()
             cursor=conn.cursor()
-            owner_dtls=cursor.execute("select * from login_access where username= %s",(name_owner,))
+            driver_dtls=cursor.execute("select role,username,email,address from login_access where username= %s",(name_owner,))
             result = cursor.fetchone()
             if result:
-                st.write(result)
+                result = np.asanyarray(result)
+                result = result.reshape(1,4)
+                df=pd.DataFrame(result,columns=['Role','Name','Email','Address'])
+                st.write(df)
             logout_status = st.button("Logout")
             if logout_status:
                 st.session_state['page'] = None
+        elif page == "Inhouse Driver DataBase":
+            st.write("Inhouse Drivers DataBase")
+            conn = connect_to_db()
+            cursor=conn.cursor()
+            driver_dtls=cursor.execute("select role,username,email,address from login_access where role=%s",("driver",))
+            result = cursor.fetchall()
+            if result:
+                result = np.asanyarray(result)
+                df=pd.DataFrame(result,columns=['Role','Name','Email','Address'])
+                st.write(df)
+            pkg_dtls = st.text_input("Package Name",key='package')
+            driver_assign=st.text_input("Assign driver",key='assigned_driver')
+            owner_current=st.session_state['user']
+            submit_status=st.button("Submit")
+            if submit_status:
+                cursor.execute("SELECT * FROM driver_owner_verification WHERE package_details = %s", (pkg_dtls,))
+                pkg_already_exists = cursor.fetchone()
+                if pkg_already_exists:
+                    st.warning("Package Already Exists!!!")
+                else:
+                    cursor.execute("INSERT INTO driver_owner_verification (owner_alloted, driver_alloted,package_details) VALUES (%s, %s, %s)", (owner_current, driver_assign, pkg_dtls))
+                    st.success("Driver alloted successfully")
+                    conn.commit()
+
         elif page == "My Location":
             try:
                 location = streamlit_geolocation()
@@ -79,7 +106,7 @@ def dashboard(role):
                 st.write(f"Estimated Time of Arrival: {eta_time.strftime('%Y-%m-%d %H:%M:%S')}")
 
             except Exception as e:
-                st.error(f"Error getting location: {e}")
+                st.error(f"Update Location")
         elif page == "Verification Portal":
             st.write("Owner's Verification Portal Page")
             username_otp = st.text_input("Enter username of driver")
@@ -113,10 +140,13 @@ def dashboard(role):
             name_driver=st.session_state['user']
             conn=connect_to_db()
             cursor=conn.cursor()
-            driver_dtls=cursor.execute("select * from login_access where username= %s",(name_driver,))
+            driver_dtls=cursor.execute("select role,username,email,address from login_access where username= %s",(name_driver,))
             result = cursor.fetchone()
             if result:
-                st.write(result)
+                result = np.asanyarray(result)
+                result = result.reshape(1,4)
+                df=pd.DataFrame(result,columns=['Role','Name','Email','Address'])
+                st.write(df)
             logout_status = st.button("Logout")
             if logout_status:
                 st.session_state['page'] = None
@@ -199,7 +229,7 @@ def dashboard(role):
                 conn.close()
 
         elif page == "Verification Portal":
-            driver_name = st.text_input("Enter driver")
+            driver_name = st.session_state['user']
             otp_driver = st.text_input("Enter OTP")
             submit_status = st.button("Submit")
             if submit_status:
@@ -218,5 +248,6 @@ def dashboard(role):
                                        (True, driver_name))
                         conn.commit()
                         conn.close()
+                        st.success("OTP Verification Successful")
                     else:
                         st.warning("Wrong OTP")
